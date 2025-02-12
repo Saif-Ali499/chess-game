@@ -4,7 +4,7 @@ import {
   performSpecialMoves,
   getGameStatus,
   getMoveNotation,
-} from "../utils/chessRules";
+} from "../utils/ChessRules";
 
 const initialBoard = () => {
   const board = Array(8)
