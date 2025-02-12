@@ -1,0 +1,118 @@
+.initial {
+  height: 100vh;
+  width: 100vw;
+  display: grid;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: aqua;
+  position: relative;
+}
+.startButton {
+  position: absolute;
+  height: 4rem;
+  aspect-ratio: 4;
+  top: 20px;
+  left: 41%;
+  background: rgb(92, 159, 92);
+  padding: 5px;
+  font-size: x-large;
+  font-weight: bolder;
+  color: white;
+  border-radius: 20px;
+  border: none;
+}
+.startButton:hover {
+  background-color: greenyellow;
+  color: black;
+  box-shadow: -10px 10px 10px;
+  text-shadow: -10px 10px 20px;
+  cursor: pointer;
+}
+.game {
+  text-align: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  background-color: aquamarine;
+  gap: 10px;
+  margin-top: 2rem;
+  margin-left: 2rem;
+}
+
+.board {
+  display: inline-block;
+  border: 2px solid #333;
+}
+
+.row {
+  display: flex;
+}
+
+.square {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 36px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.light {
+  background-color: rgb(220, 238, 255);
+}
+
+.dark {
+  background-color: #6fb2ea;
+}
+
+.selected {
+  background-color: pink;
+}
+
+.piece {
+  pointer-events: none;
+}
+
+.game-status {
+  margin: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  width: 15rem;
+  justify-content: center;
+}
+
+.gameButton {
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 20px;
+  font-weight: bolder;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  background-color: rgb(133, 207, 29);
+  border: none;
+  border-radius: 10px;
+  color: white;
+}
+.timer {
+  padding: 10px;
+  font-weight: bolder;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  font-size: xx-large;
+}
+.move-list {
+  height: auto;
+  width: 12rem;
+  font-size: large;
+  border: 2px solid rgb(0, 0, 0);
+}
+.turn {
+  width: 10rem;
+  height: 2rem;
+  padding: 5px;
+  font-weight: bolder;
+  background-color: rgba(192, 228, 255, 0.765);
+}
