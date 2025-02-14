@@ -114,6 +114,7 @@ const gameSlice = createSlice({
           state.selected = null;
           state.status = getGameStatus(state.board, state.turn);
         } else {
+          alert("Invalid Move");
           state.selected = null;
         }
       } else {

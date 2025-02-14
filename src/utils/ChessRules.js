@@ -1,4 +1,3 @@
-
 export const isValidMove = (piece, move, board, enPassant) => {
   const { from, to } = move;
   const dr = to.row - from.row;
@@ -8,32 +7,48 @@ export const isValidMove = (piece, move, board, enPassant) => {
   if (to.row < 0 || to.row > 7 || to.col < 0 || to.col > 7) return false;
 
   // Cannot capture your own piece.
-  if (board[to.row][to.col] && board[to.row][to.col].color === piece.color) return false;
+  if (board[to.row][to.col] && board[to.row][to.col].color === piece.color)
+    return false;
 
+  // Validate movement rules for the piece.
+  let isValid = false;
   switch (piece.type) {
-    case 'pawn':
-      return validatePawn(piece, move, board, enPassant);
-    case 'rook':
-      return validateRook(piece, move, board);
-    case 'knight':
-      return validateKnight(dr, dc);
-    case 'bishop':
-      return validateBishop(piece, move, board);
-    case 'queen':
-      return validateRook(piece, move, board) || validateBishop(piece, move, board);
-    case 'king':
-      return validateKing(piece, move, board);
-    default:
-      return false;
+    case "pawn":
+      isValid = validatePawn(piece, move, board, enPassant);
+      break;
+    case "rook":
+      isValid = validateRook(piece, move, board);
+      break;
+    case "knight":
+      isValid = validateKnight(dr, dc);
+      break;
+    case "bishop":
+      isValid = validateBishop(piece, move, board);
+      break;
+    case "queen":
+      isValid =
+        validateRook(piece, move, board) || validateBishop(piece, move, board);
+      break;
+    case "king":
+      isValid = validateKing(piece, move, board);
+      break;
   }
+
+  // If the move is not valid, return false immediately.
+  if (!isValid) return false;
+
+  // Ensure the move does not leave the king in check.
+  if (wouldKingBeInCheck(piece, move, board)) return false;
+
+  return true;
 };
 
 const validatePawn = (piece, move, board, enPassant) => {
   const { from, to } = move;
   const dr = to.row - from.row;
   const dc = to.col - from.col;
-  const direction = piece.color === 'white' ? -1 : 1;
-  const startRow = piece.color === 'white' ? 6 : 1;
+  const direction = piece.color === "white" ? -1 : 1;
+  const startRow = piece.color === "white" ? 6 : 1;
 
   // Forward move.
   if (dc === 0) {
@@ -81,8 +96,10 @@ const validateRook = (piece, move, board) => {
 };
 
 const validateKnight = (dr, dc) => {
-  return (Math.abs(dr) === 2 && Math.abs(dc) === 1) ||
-         (Math.abs(dr) === 1 && Math.abs(dc) === 2);
+  return (
+    (Math.abs(dr) === 2 && Math.abs(dc) === 1) ||
+    (Math.abs(dr) === 1 && Math.abs(dc) === 2)
+  );
 };
 
 const validateBishop = (piece, move, board) => {
@@ -115,17 +132,30 @@ const validateKing = (piece, move, board) => {
     // Kingside castling.
     if (to.col === 6) {
       const rook = board[from.row][7];
-      if (!rook || rook.type !== 'rook' || rook.hasMoved) return false;
+      if (!rook || rook.type !== "rook" || rook.hasMoved) return false;
       if (board[from.row][5] || board[from.row][6]) return false;
-      if (wouldKingBeInCheck(piece, move, board, { castling: 'kingside', row: from.row })) return false;
+      if (
+        wouldKingBeInCheck(piece, move, board, {
+          castling: "kingside",
+          row: from.row,
+        })
+      )
+        return false;
       return true;
     }
     // Queenside castling.
     if (to.col === 2) {
       const rook = board[from.row][0];
-      if (!rook || rook.type !== 'rook' || rook.hasMoved) return false;
-      if (board[from.row][1] || board[from.row][2] || board[from.row][3]) return false;
-      if (wouldKingBeInCheck(piece, move, board, { castling: 'queenside', row: from.row })) return false;
+      if (!rook || rook.type !== "rook" || rook.hasMoved) return false;
+      if (board[from.row][1] || board[from.row][2] || board[from.row][3])
+        return false;
+      if (
+        wouldKingBeInCheck(piece, move, board, {
+          castling: "queenside",
+          row: from.row,
+        })
+      )
+        return false;
       return true;
     }
   }
@@ -134,17 +164,17 @@ const validateKing = (piece, move, board) => {
 
 const wouldKingBeInCheck = (piece, move, board, options = {}) => {
   // Create a temporary board to simulate the move.
-  const tempBoard = board.map(row => row.slice());
+  const tempBoard = board.map((row) => row.slice());
   const { from, to } = move;
   tempBoard[to.row][to.col] = { ...piece };
   tempBoard[from.row][from.col] = null;
   // If castling, also move the rook.
-  if (options.castling === 'kingside') {
+  if (options.castling === "kingside") {
     const rook = tempBoard[options.row][7];
     tempBoard[options.row][5] = { ...rook, hasMoved: true };
     tempBoard[options.row][7] = null;
   }
-  if (options.castling === 'queenside') {
+  if (options.castling === "queenside") {
     const rook = tempBoard[options.row][0];
     tempBoard[options.row][3] = { ...rook, hasMoved: true };
     tempBoard[options.row][0] = null;
@@ -154,7 +184,7 @@ const wouldKingBeInCheck = (piece, move, board, options = {}) => {
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const p = tempBoard[r][c];
-      if (p && p.type === 'king' && p.color === piece.color) {
+      if (p && p.type === "king" && p.color === piece.color) {
         kingPos = { row: r, col: c };
         break;
       }
@@ -166,7 +196,13 @@ const wouldKingBeInCheck = (piece, move, board, options = {}) => {
     for (let c = 0; c < 8; c++) {
       const p = tempBoard[r][c];
       if (p && p.color !== piece.color) {
-        if (isValidMoveForCheck(p, { from: { row: r, col: c }, to: kingPos }, tempBoard)) {
+        if (
+          isValidMoveForCheck(
+            p,
+            { from: { row: r, col: c }, to: kingPos },
+            tempBoard
+          )
+        ) {
           return true;
         }
       }
@@ -181,20 +217,22 @@ const isValidMoveForCheck = (piece, move, board) => {
   const dr = to.row - from.row;
   const dc = to.col - from.col;
   switch (piece.type) {
-    case 'pawn': {
-      const direction = piece.color === 'white' ? -1 : 1;
+    case "pawn": {
+      const direction = piece.color === "white" ? -1 : 1;
       if (Math.abs(dc) === 1 && dr === direction) return true;
       return false;
     }
-    case 'rook':
+    case "rook":
       return validateRook(piece, move, board);
-    case 'knight':
+    case "knight":
       return validateKnight(dr, dc);
-    case 'bishop':
+    case "bishop":
       return validateBishop(piece, move, board);
-    case 'queen':
-      return validateRook(piece, move, board) || validateBishop(piece, move, board);
-    case 'king':
+    case "queen":
+      return (
+        validateRook(piece, move, board) || validateBishop(piece, move, board)
+      );
+    case "king":
       return Math.abs(dr) <= 1 && Math.abs(dc) <= 1;
     default:
       return false;
@@ -205,10 +243,10 @@ const isValidMoveForCheck = (piece, move, board) => {
 export const performSpecialMoves = (piece, move, board, enPassant) => {
   const { from, to } = move;
   // Deep copy the board.
-  const newBoard = board.map(row => row.slice());
+  const newBoard = board.map((row) => row.slice());
 
   // En passant capture.
-  if (piece.type === 'pawn') {
+  if (piece.type === "pawn") {
     if (Math.abs(to.col - from.col) === 1 && !board[to.row][to.col]) {
       newBoard[from.row][to.col] = null;
     }
@@ -220,7 +258,7 @@ export const performSpecialMoves = (piece, move, board, enPassant) => {
 
   let newEnPassant = null;
   // Set en passant square if pawn moves two squares.
-  if (piece.type === 'pawn' && Math.abs(to.row - from.row) === 2) {
+  if (piece.type === "pawn" && Math.abs(to.row - from.row) === 2) {
     newEnPassant = {
       row: (from.row + to.row) / 2,
       col: from.col,
@@ -228,11 +266,13 @@ export const performSpecialMoves = (piece, move, board, enPassant) => {
   }
 
   // Handle castling: move the rook.
-  if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
-    if (to.col === 6) { // kingside
+  if (piece.type === "king" && Math.abs(to.col - from.col) === 2) {
+    if (to.col === 6) {
+      // kingside
       newBoard[from.row][5] = { ...newBoard[from.row][7], hasMoved: true };
       newBoard[from.row][7] = null;
-    } else if (to.col === 2) { // queenside
+    } else if (to.col === 2) {
+      // queenside
       newBoard[from.row][3] = { ...newBoard[from.row][0], hasMoved: true };
       newBoard[from.row][0] = null;
     }
@@ -241,9 +281,8 @@ export const performSpecialMoves = (piece, move, board, enPassant) => {
   return { board: newBoard, enPassant: newEnPassant };
 };
 
-
 const coordsToSquare = (row, col) => {
-  const files = 'abcdefgh';
+  const files = "abcdefgh";
   const rank = 8 - row; // row 0 is rank 8, row 7 is rank 1.
   return `${files[col]}${rank}`;
 };
@@ -253,7 +292,7 @@ export const getMoveNotation = (piece, move, previousBoard, promotion) => {
   const toSquare = coordsToSquare(move.to.row, move.to.col);
 
   // Detect castling (king moves two squares horizontally).
-  if (piece.type === 'king' && Math.abs(move.to.col - move.from.col) === 2) {
+  if (piece.type === "king" && Math.abs(move.to.col - move.from.col) === 2) {
     return move.to.col === 6 ? "O-O" : "O-O-O";
   }
 
@@ -264,15 +303,21 @@ export const getMoveNotation = (piece, move, previousBoard, promotion) => {
   }
 
   // Determine the piece notation.
-  let pieceNotation = '';
-  if (piece.type !== 'pawn') {
+  let pieceNotation = "";
+  if (piece.type !== "pawn") {
     // Use uppercase first letter for pieces (except pawns).
-    const notationMap = { king: 'K', queen: 'Q', rook: 'R', bishop: 'B', knight: 'N' };
-    pieceNotation = notationMap[piece.type] || '';
+    const notationMap = {
+      king: "K",
+      queen: "Q",
+      rook: "R",
+      bishop: "B",
+      knight: "N",
+    };
+    pieceNotation = notationMap[piece.type] || "";
   } else {
     // For pawn captures, include the originating file.
     if (capture) {
-      const files = 'abcdefgh';
+      const files = "abcdefgh";
       pieceNotation = files[move.from.col];
     }
   }
@@ -286,24 +331,34 @@ export const getMoveNotation = (piece, move, previousBoard, promotion) => {
 // A simplified game status function.
 export const getGameStatus = (board, turn) => {
   let kingPos = null;
+
+  // Find the king's position.
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const piece = board[r][c];
-      if (piece && piece.type === 'king' && piece.color === turn) {
+      if (piece && piece.type === "king" && piece.color === turn) {
         kingPos = { row: r, col: c };
         break;
       }
     }
     if (kingPos) break;
   }
-  if (!kingPos) return 'Checkmate';
 
+  if (!kingPos) return "Checkmate";
+
+  // Check if the king is under attack.
   let kingInCheck = false;
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
       const piece = board[r][c];
       if (piece && piece.color !== turn) {
-        if (isValidMoveForCheck(piece, { from: { row: r, col: c }, to: kingPos }, board)) {
+        if (
+          isValidMoveForCheck(
+            piece,
+            { from: { row: r, col: c }, to: kingPos },
+            board
+          )
+        ) {
           kingInCheck = true;
           break;
         }
@@ -312,14 +367,39 @@ export const getGameStatus = (board, turn) => {
     if (kingInCheck) break;
   }
 
-  return kingInCheck ? "Check" : "";
+  if (kingInCheck) {
+    // If king is in check, ensure only moves that resolve check are allowed.
+    let hasEscapeMove = false;
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const piece = board[r][c];
+        if (piece && piece.color === turn) {
+          for (let tr = 0; tr < 8; tr++) {
+            for (let tc = 0; tc < 8; tc++) {
+              const testMove = {
+                from: { row: r, col: c },
+                to: { row: tr, col: tc },
+              };
+              if (
+                isValidMove(piece, testMove, board, null) &&
+                !wouldKingBeInCheck(piece, testMove, board)
+              ) {
+                hasEscapeMove = true;
+                break;
+              }
+            }
+            if (hasEscapeMove) break;
+          }
+        }
+        if (hasEscapeMove) break;
+      }
+      if (hasEscapeMove) break;
+    }
+
+    return hasEscapeMove ? "Check" : "Checkmate";
+  }
+
+  return "";
 };
 
-// --- (Other helper functions: isValidMove, validatePawn, validateRook, validateKnight, validateBishop, validateKing, wouldKingBeInCheck, isValidMoveForCheck, performSpecialMoves) --- //
-
-export {
-  validateRook,
-  validateKnight,
-  validateBishop,
-};
-
+export { validateRook, validateKnight, validateBishop };
